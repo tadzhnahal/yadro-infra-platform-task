@@ -1,3 +1,4 @@
+import logging
 import os
 
 import requests
@@ -8,10 +9,16 @@ status_codes = [102, 200, 302, 404, 500]
 timeout_seconds = 10
 
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+
+
 def make_request(status_code):
     url = f"{base_url.rstrip('/')}/{status_code}"
 
-    print("request url:", url)
+    logging.info("request url: %s", url)
 
     try:
         response = requests.get(url, timeout=timeout_seconds, allow_redirects=False)
@@ -21,12 +28,12 @@ def make_request(status_code):
         if len(body) > 200:
             body = body[:200] + "..."
 
-        print("status code:", response.status_code)
-        print("body:", body)
-        print("-" * 40)
+        logging.info("status code: %s", response.status_code)
+        logging.info("body: %s", body)
+        logging.info("-" * 40)
     except requests.RequestException as error:
-        print("request error:", error)
-        print("-" * 40)
+        logging.error("request error: %s", error)
+        logging.info("-" * 40)
 
 
 def main():
