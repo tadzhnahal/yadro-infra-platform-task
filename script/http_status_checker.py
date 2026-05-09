@@ -29,7 +29,8 @@ def make_request(status_code):
 
     if 100 <= response.status_code < 400:
         logging.info(
-            "successful response: status_code=%s, body=%s",
+            "successful response: requested_status_code=%s, actual_status_code=%s, body=%s",
+            status_code,
             response.status_code,
             body,
         )
@@ -37,11 +38,13 @@ def make_request(status_code):
 
     if 400 <= response.status_code < 600:
         raise Exception(
-            f"bad response: status_code={response.status_code}, body={body!r}"
+            f"bad response: requested_status_code={status_code}, "
+            f"actual_status_code={response.status_code}, body={body!r}"
         )
 
     raise Exception(
-        f"unexpected response: status_code={response.status_code}, body={body!r}"
+        f"unexpected response: requested_status_code={status_code}, "
+        f"actual_status_code={response.status_code}, body={body!r}"
     )
 
 
@@ -51,16 +54,12 @@ def main():
             make_request(status_code)
         except requests.RequestException as error:
             logging.error(
-                "request failed for status_code=%s: %s",
+                "request failed: requested_status_code=%s, error=%s",
                 status_code,
                 error,
             )
         except Exception as error:
-            logging.error(
-                "status check failed for status_code=%s: %s",
-                status_code,
-                error,
-            )
+            logging.error("status check failed: %s", error)
 
         logging.info("-" * 40)
 
