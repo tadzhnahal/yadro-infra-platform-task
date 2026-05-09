@@ -20,25 +20,49 @@ def make_request(status_code):
 
     logging.info("request url: %s", url)
 
-    try:
-        response = requests.get(url, timeout=timeout_seconds, allow_redirects=False)
+    response = requests.get(url, timeout=timeout_seconds, allow_redirects=False)
 
-        body = response.text.strip()
+    body = response.text.strip()
 
-        if len(body) > 200:
-            body = body[:200] + "..."
+    if len(body) > 200:
+        body = body[:200] + "..."
 
-        logging.info("status code: %s", response.status_code)
-        logging.info("body: %s", body)
-        logging.info("-" * 40)
-    except requests.RequestException as error:
-        logging.error("request error: %s", error)
-        logging.info("-" * 40)
+    if 100 <= response.status_code < 400:
+        logging.info(
+            "successful response: status_code=%s, body=%s",
+            response.status_code,
+            body,
+        )
+        return
+
+    if 400 <= response.status_code < 600:
+        raise Exception(
+            f"bad response: status_code={response.status_code}, body={body!r}"
+        )
+
+    raise Exception(
+        f"unexpected response: status_code={response.status_code}, body={body!r}"
+    )
 
 
 def main():
     for status_code in status_codes:
-        make_request(status_code)
+        try:
+            make_request(status_code)
+        except requests.RequestException as error:
+            logging.error(
+                "request failed for status_code=%s: %s",
+                status_code,
+                error,
+            )
+        except Exception as error:
+            logging.error(
+                "status check failed for status_code=%s: %s",
+                status_code,
+                error,
+            )
+
+        logging.info("-" * 40)
 
 
 if __name__ == "__main__":
