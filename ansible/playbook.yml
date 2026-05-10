@@ -1,0 +1,13 @@
+---
+- name: Prepare local host
+  hosts: local
+  gather_facts: true
+
+  tasks:
+    - name: Show target system
+      ansible.builtin.debug:
+        msg: "Target system: {{ ansible_distribution }} {{ ansible_distribution_version }} ({{ ansible_os_family }})"
+
+    - name: Show current user
+      ansible.builtin.debug:
+        msg: "Current user: {{ ansible_user_id }}"
