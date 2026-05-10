@@ -3,6 +3,19 @@
   hosts: local
   gather_facts: true
 
+  vars:
+    docker_packages_debian:
+      - docker.io
+      - python3
+      - python3-pip
+      - ca-certificates
+
+    docker_packages_redhat:
+      - moby-engine
+      - python3
+      - python3-pip
+      - ca-certificates
+
   tasks:
     - name: Show target system
       ansible.builtin.debug:
@@ -11,3 +24,22 @@
     - name: Show current user
       ansible.builtin.debug:
         msg: "Current user: {{ ansible_user_id }}"
+
+    - name: Choose Docker packages for Debian family
+      ansible.builtin.set_fact:
+        docker_packages: "{{ docker_packages_debian }}"
+      when: ansible_os_family == "Debian"
+
+    - name: Choose Docker packages for RedHat family
+      ansible.builtin.set_fact:
+        docker_packages: "{{ docker_packages_redhat }}"
+      when: ansible_os_family == "RedHat"
+
+    - name: Stop if OS family is not supported
+      ansible.builtin.fail:
+        msg: "Unsupported OS family: {{ ansible_os_family }}"
+      when: docker_packages is not defined
+
+    - name: Show selected Docker packages
+      ansible.builtin.debug:
+        msg: "Docker packages: {{docker_packages}}"
