@@ -43,3 +43,27 @@
     - name: Show selected Docker packages
       ansible.builtin.debug:
         msg: "Docker packages: {{docker_packages}}"
+
+    - name: Check Docker before install
+      ansible.builtin.command:
+        cmd: docker --version
+      register: docker_before
+      changed_when: false
+      failed_when: false
+
+    - name: Install Docker and required packages
+      ansible.builtin.package:
+        name: "{{ docker_packages }}"
+        state: present
+      become: true
+      when: docker_before.rc != 0
+
+    - name: Check Docker version
+      ansible.builtin.command:
+        cmd: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Show Docker version
+      ansible.builtin.debug:
+        msg: "{{ docker_version.stdout }}"
