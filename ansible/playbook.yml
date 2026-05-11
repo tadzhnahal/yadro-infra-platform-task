@@ -5,6 +5,8 @@
 
   vars:
     target_user: "{{ ansible_user_id }}"
+    project_root: "{{ playbook_dir }}/.."
+    image_name: yadro-http-checker
 
     docker_packages_debian:
       - docker.io
@@ -110,3 +112,30 @@
     - name: Show Docker service autostart
       ansible.builtin.debug:
         msg: "docker.service is {{ docker_service_enabled.stdout }}"
+
+    - name: Check Dockerfile exists
+      ansible.builtin.stat:
+        path: "{{ project_root }}/docker/Dockerfile"
+      register: dockerfile_stat
+
+    - name: Stop if Dockerfile is missing
+      ansible.builtin.fail:
+        msg: "Dockerfile not found: {{ project_root }}/docker/Dockerfile"
+      when: not dockerfile_stat.stat.exists
+
+    - name: Build Docker image
+      ansible.builtin.command:
+        cmd: docker build -f docker/Dockerfile -t "{{ image_name }}" .
+        chdir: "{{ project_root }}"
+      become: true
+
+    - name: Check Docker image
+      ansible.builtin.command:
+        cmd: docker image inspect "{{ image_name }}:latest"
+      register: docker_image_info
+      changed_when: false
+      become: true
+
+    - name: Show Docker image status
+      ansible.builtin.debug:
+        msg: "Docker image {{ image_name }}:latest is available"
