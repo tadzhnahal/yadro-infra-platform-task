@@ -1,0 +1,22 @@
+---
+- name: Remove old checker container
+  ansible.builtin.command:
+    cmd: docker rm -f "{{ container_name }}"
+  register: remove_container
+  changed_when: remove_container.rc == 0
+  failed_when: false
+  become: true
+
+- name: Run checker container
+  ansible.builtin.command:
+    cmd: >
+      docker run
+      --name "{{ container_name }}"
+      -e HTTP_STATUS_BASE_URL="{{ http_status_base_url }}"
+      "{{ image_name }}"
+  register: container_run
+  become: true
+
+- name: Show container run result
+  ansible.builtin.debug:
+    msg: "Container {{ container_name }} finished with return code {{ container_run.rc }}"
