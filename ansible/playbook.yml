@@ -8,7 +8,7 @@
     project_root: "{{ playbook_dir }}/.."
     image_name: yadro-http-checker
     container_name: yadro-http-checker-container
-    http_status_base_url: https://tools-httpstatus.pickup-services.com
+    http_status_base_url: "{{ lookup('ansible.builtin.env', 'HTTP_STATUS_BASE_URL') | default('https://httpstat.us', true) }}"
 
     required_log_items:
       - "requested_status_code=102"
