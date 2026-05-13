@@ -155,21 +155,21 @@ python -m pip install -r script/requirements.txt
 
 ### 4. Запустите Python-скрипт локально
 
-Запустите скрипт с совместимым эндпоинтом. Выполните команду:
-
-```bash
-HTTP_STATUS_BASE_URL=https://tools-httpstatus.pickup-services.com python script/http_status_checker.py
-```
-
-В выводе появятся пять запросов. Для `200` и `302` скрипт выведет `successful response`. Для `404` и `500` скрипт выведет ошибку `status check failed`.
-
-Можно также запустить скрипт с адресом из задания. Выполните команду:
+Запустите скрипт с адресом из задания. Выполните команду:
 
 ```bash
 python script/http_status_checker.py
 ```
 
 В этом режиме скрипт использует `https://httpstat.us`. Если сервис рвёт соединение, скрипт выведет сетевые ошибки и всё равно пройдёт все пять запросов.
+
+Вы также можете запустить скрипт с совместимым эндпоинтом. Выполните команду:
+
+```bash
+HTTP_STATUS_BASE_URL=https://tools-httpstatus.pickup-services.com python script/http_status_checker.py
+```
+
+В выводе появятся пять запросов. Для `200` и `302` скрипт выведет `successful response`. Для `404` и `500` скрипт выведет ошибку `status check failed`.
 
 ### 5. Соберите Docker-образ вручную
 
@@ -195,7 +195,21 @@ docker images yadro-http-checker
 docker rm -f yadro-http-checker-container 2>/dev/null || true
 ```
 
-Запустите контейнер со скриптом. Выполните команду:
+Запустите контейнер с адресом из задания. Выполните команду:
+
+```bash
+docker run --name yadro-http-checker-container yadro-http-checker
+```
+
+Контейнер запустит скрипт и завершит работу. В этом режиме скрипт использует `https://httpstat.us`. Если сервис рвёт соединение, в логах появятся сетевые ошибки.
+
+Если нужно проверить ответы на совместимом эндпоинте, сначала удалите старый контейнер. Выполните команду:
+
+```bash
+docker rm -f yadro-http-checker-container 2>/dev/null || true
+```
+
+После этого запустите контейнер с переменной окружения `HTTP_STATUS_BASE_URL`. Выполните команду:
 
 ```bash
 docker run --name yadro-http-checker-container \
@@ -203,11 +217,11 @@ docker run --name yadro-http-checker-container \
   yadro-http-checker
 ```
 
-Контейнер запустит скрипт и завершит работу.
+В этом режиме скрипт использует совместимый эндпоинт `https://tools-httpstatus.pickup-services.com`.
 
 ### 7. Проверьте логи контейнера
 
-Посмотрите логи контейнера. Выполните команду:
+Посмотрите логи последнего запуска контейнера. Выполните команду:
 
 ```bash
 docker logs yadro-http-checker-container
@@ -263,7 +277,7 @@ ansible-playbook playbook.yml --ask-become-pass
 
 Введите пароль пользователя, когда Ansible попросит `BECOME password`.
 
-При обычном запуске playbook использует адрес из задания: `https://httpstat.us`. Если сервис рвёт соединение, скрипт логирует сетевые ошибки и всё равно проходит все пять запросов.
+При обычном запуске playbook использует адрес из задания: `https://httpstat.us`. Если сервис рвёт соединение, playbook проверяет код выхода контейнера и наличие всех пяти статус-кодов в логах.
 
 Для проверки на совместимом сервисе можно явно передать другой базовый адрес. Выполните команду:
 
