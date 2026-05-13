@@ -36,7 +36,7 @@
 
     - name: Show current user
       ansible.builtin.debug:
-        msg: "Current user: {{ ansible_user_id }}"
+        msg: "Current user: {{ target_user }}"
 
     - name: Choose Docker packages for Debian family
       ansible.builtin.set_fact:
@@ -55,7 +55,7 @@
 
     - name: Show selected Docker packages
       ansible.builtin.debug:
-        msg: "Docker packages: {{docker_packages}}"
+        msg: "Docker packages: {{ docker_packages }}"
 
     - name: Check Docker before install
       ansible.builtin.command:
@@ -69,7 +69,6 @@
         name: "{{ docker_packages }}"
         state: present
       become: true
-      when: docker_before.rc != 0
 
     - name: Ensure docker group exists
       ansible.builtin.group:
@@ -174,8 +173,8 @@
     - name: Check container exit code
       ansible.builtin.command:
         cmd: >
-           docker inspect "{{ container_name }}"
-           --format '{% raw %}{{.State.ExitCode}}{% endraw %}'
+          docker inspect "{{ container_name }}"
+          --format '{% raw %}{{.State.ExitCode}}{% endraw %}'
       register: container_exit_code
       changed_when: false
       become: true
@@ -202,7 +201,7 @@
           - item in container_logs.stdout
         fail_msg: "Log item not found: {{ item }}"
         success_msg: "Log item found: {{ item }}"
-      loop: "{{required_log_items}}"
+      loop: "{{ required_log_items }}"
 
     - name: Show final check result
       ansible.builtin.debug:
